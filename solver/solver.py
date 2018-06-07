@@ -32,7 +32,7 @@ def get_solution_values(X, nt, nw):
     return values
 
 
-def solve(data, time_limit = 2000):
+def solve(data, time_limit = 2000, log = False):
     #
     # CREATE A SOLVER INSTANCE
     # Signature: Solver(<solver name>)
@@ -66,7 +66,7 @@ def solve(data, time_limit = 2000):
         residual -= w['amount']
         i -= 1
 
-    print 'Z lower bound: %d' % z_lb
+    if log: print 'Z lower bound: %d' % z_lb
 
     #
     # CREATE VARIABLES
@@ -151,13 +151,14 @@ def solve(data, time_limit = 2000):
     # DEFINE THE SEARCH STRATEGY
     #
     decision_builder = slv.Phase(all_vars,
-                                    slv.CHOOSE_FIRST_UNBOUND,
+                                    slv.CHOOSE_RANDOM,
                                     slv.ASSIGN_MAX_VALUE)
 
     #
     # INIT THE SEARCH PROCESS
     #
-    search_monitors = [slv.TimeLimit(time_limit), slv.Minimize(z, 1), slv.LubyRestart(2)]
+    search_monitors = [slv.SearchLog(500000)] if log else []
+    search_monitors += [slv.TimeLimit(time_limit), slv.Minimize(z, 1), slv.LubyRestart(2)]
     slv.NewSearch(decision_builder, search_monitors)
 
     #
@@ -169,10 +170,11 @@ def solve(data, time_limit = 2000):
     while slv.NextSolution():
         pass
 
-        print 'SOLUTION FOUND =========================='
-        print_sol(X, wines, nt, nw)
-        print 'Total penalty: %d' % z.Value()
-        print 'END OF SOLUTION =========================='
+        if log:
+            print 'SOLUTION FOUND =========================='
+            print_sol(X, wines, nt, nw)
+            print 'Total penalty: %d' % z.Value()
+            print 'END OF SOLUTION =========================='
 
         best_solution = get_solution_values(X, nt, nw)
 
@@ -184,16 +186,17 @@ def solve(data, time_limit = 2000):
     #
     slv.EndSearch()
 
-    if nsol == 0:
-        print 'no solution found'
-    else:
-        print '%d solutions found. The best one has penalty %d.' % (nsol, zbest)
+    if log:
+        if nsol == 0:
+            print 'no solution found'
+        else:
+            print '%d solutions found. The best one has penalty %d.' % (nsol, zbest)
 
-    # Print solution information
-    print 'Number of branches: %d' % slv.Branches()
-    print 'Computation time: %f (ms)' % slv.WallTime()
-    if slv.WallTime() > time_limit:
-        print 'Time limit exceeded'
+        # Print solution information
+        print 'Number of branches: %d' % slv.Branches()
+        print 'Computation time: %f (ms)' % slv.WallTime()
+        if slv.WallTime() > time_limit:
+            print 'Time limit exceeded'
 
     return best_solution
 
@@ -210,4 +213,4 @@ if __name__ == "__main__":
     with open(fname) as fin:
         data = json.load(fin)
 
-    solve(data, time_limit=timelimit)
+    solve(data, time_limit = timelimit, log = True)

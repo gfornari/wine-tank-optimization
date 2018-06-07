@@ -51,7 +51,7 @@ def generate_wines(n, min, max):
 
 if __name__ == "__main__":
     if len(sys.argv) < 8:
-        print 'Usage: python %s <tanks_number> <min_cap> <max_cap> <wines_number> <min_amount> <max_amount> <output_file>' % sys.argv[0]
+        print 'Usage: python %s <tanks_number> <min_cap> <max_cap> <wines_number> <min_amount> <max_amount> <output_dir>' % sys.argv[0]
         sys.exit(1)
     else:
         tanks_number = int(sys.argv[1])
@@ -60,13 +60,21 @@ if __name__ == "__main__":
         wines_number = int(sys.argv[4])
         min_amount = int(sys.argv[5])
         max_amount = int(sys.argv[6])
-        output_file = sys.argv[7]
+        output_dir = sys.argv[7]
 
     instance = {
         "penalty": penalties,
         "wines": generate_wines(wines_number, min_amount, max_amount),
         "tanks": generate_tanks(tanks_number, min_cap, max_cap)
     }
+
+    output_file = (output_dir + '/data-' +
+        str(tanks_number) + '-' +
+        str(min_cap) + '-' +
+        str(max_cap) + '-' +
+        str(wines_number) + '-' +
+        str(min_amount) + '-' +
+        str(max_amount) + '.json')
 
     with open(output_file, 'w') as f:
         json.dump(instance, f, indent=2)
