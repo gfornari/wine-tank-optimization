@@ -102,37 +102,6 @@ def solve(data, time_limit = 2000, log = False):
         S = slv.Sum([ X[i][j] for i in range(nw) ])
         slv.Add((S == 0) <= (Y[j] == -1))
 
-    # Vincolo ridondante per quello precedente (Alla fine e' un GCC sulla Y)    ... FA PEGGIO
-    '''
-
-    mostolb  = 0
-    rossolb  = 0
-    biancolb = 0
-
-    mostoub  = 0
-    rossoub  = 0
-    biancoub = 0
-
-    for w in wines:
-        if w['class'] == 0:
-
-            mostoub += w['amount']
-        elif w['class'] == 1:
-
-            rossoub += w['amount']
-        else:
-
-            biancoub += w['amount']
-
-    boundsMosto  = slv.IntVar(mostolb,mostoub,"boundsMosto")
-    boundsRosso  = slv.IntVar(rossolb,rossoub,"boundsRosso")
-    boundsBianco = slv.IntVar(biancolb,biancoub,"boundsBianco")
-
-    slv.Add(slv.Distribute(Y,[0,1,2],[boundsMosto,boundsRosso,boundsBianco]))
-    //
-    '''
-    # PENALTIES
-
     # penalties
     penalties = []
     for i, w in enumerate(wines):
@@ -151,14 +120,14 @@ def solve(data, time_limit = 2000, log = False):
     # DEFINE THE SEARCH STRATEGY
     #
     decision_builder = slv.Phase(all_vars,
-                                    slv.CHOOSE_RANDOM,
+                                    slv.CHOOSE_FIRST_UNBOUND,
                                     slv.ASSIGN_MAX_VALUE)
 
     #
     # INIT THE SEARCH PROCESS
     #
     search_monitors = [slv.SearchLog(500000)] if log else []
-    search_monitors += [slv.TimeLimit(time_limit), slv.Minimize(z, 1), slv.LubyRestart(2)]
+    search_monitors += [slv.TimeLimit(time_limit), slv.Minimize(z, 1)]#, slv.LubyRestart(2)]
     slv.NewSearch(decision_builder, search_monitors)
 
     #
