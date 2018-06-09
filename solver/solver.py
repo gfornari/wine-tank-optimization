@@ -32,7 +32,7 @@ def get_solution_values(X, nt, nw):
     return values
 
 
-def solve(data, time_limit = 2000, log = False):
+def solve(data, time_limit = 2000, search_strategy = 'restart', log = False):
     #
     # CREATE A SOLVER INSTANCE
     # Signature: Solver(<solver name>)
@@ -119,7 +119,13 @@ def solve(data, time_limit = 2000, log = False):
     #
     # DEFINE THE SEARCH STRATEGY
     #
-    decision_builder = slv.Phase(all_vars,
+    decision_builder = None
+    if search_strategy == 'restart':
+        decision_builder = slv.Phase(all_vars,
+                                    slv.CHOOSE_RANDOM,
+                                    slv.ASSIGN_MAX_VALUE)
+    elif search_strategy == 'firstunbound':
+        decision_builder = slv.Phase(all_vars,
                                     slv.CHOOSE_FIRST_UNBOUND,
                                     slv.ASSIGN_MAX_VALUE)
 
@@ -127,7 +133,9 @@ def solve(data, time_limit = 2000, log = False):
     # INIT THE SEARCH PROCESS
     #
     search_monitors = [slv.SearchLog(500000)] if log else []
-    search_monitors += [slv.TimeLimit(time_limit), slv.Minimize(z, 1)]#, slv.LubyRestart(2)]
+    search_monitors += [slv.TimeLimit(time_limit), slv.Minimize(z, 1)]
+    if search_strategy == 'restart':
+        search_monitors += [slv.LubyRestart(2)]
     slv.NewSearch(decision_builder, search_monitors)
 
     #
@@ -171,15 +179,21 @@ def solve(data, time_limit = 2000, log = False):
 
 if __name__ == "__main__":
     # Parse command line
-    if len(sys.argv) < 2:
-        print 'Usage: python %s <data file> [timelimit]' % sys.argv[0]
+    if len(sys.argv) < 3:
+        print 'Usage: python %s <restart|firstunbound> <data file> [timelimit]' % sys.argv[0]
         sys.exit(1)
     else:
-        fname = sys.argv[1]
-        timelimit = int(sys.argv[2]) if len(sys.argv) > 2 else 2000
+        search_strategy = sys.argv[1]
+        fname = sys.argv[2]
+        timelimit = int(sys.argv[3]) if len(sys.argv) > 3 else 2000
+
+    # Check input
+    if search_strategy not in ['restart', 'firstunbound']:
+        print 'Search strategy has to be "restart" or "firstunbound"'
+        sys.exit(1)
 
     # READ PROBLEM DATA
     with open(fname) as fin:
         data = json.load(fin)
 
-    solve(data, time_limit = timelimit, log = True)
+    solve(data, time_limit = timelimit, search_strategy = search_strategy, log = True)
