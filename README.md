@@ -38,6 +38,6 @@ trapped in a local minimum, while the first one tries to escape from them.
 Hence, the *firstunbound* strategy is more suitable for big instances, while
 *restart* give better results for small instances.
 
-In the `test` folder, there is an test instance generator useful to generate
+In the `test` folder, there is a test instance generator useful to generate
 some random test instances. You can provide it some parameters (try to use it.
 It will complain if it doesn't like you).
