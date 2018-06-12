@@ -6,9 +6,11 @@
 npm install && bower install
 ```
 
+If you want to execute the UI, you have to install Flask first (see the [install documentation](http://flask.pocoo.org/docs/1.0/installation/)).
+
 ## Usage
 
-There are 3 main components: the UI, the solver (with its the server), the
+There are 3 main components: the UI, the solver (with its server), the
 instance generator.
 
 In order to interact with the UI, two commands are available:
